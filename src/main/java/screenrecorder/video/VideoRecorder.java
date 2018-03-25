@@ -43,11 +43,6 @@ public class VideoRecorder implements Recorder {
             final List<BufferedImage> images = new ArrayList<>(100);
             while (!stopped) {
                 images.add(screenShotter.takeScreenshot());
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    // ignore
-                }
             }
             return images;
         });
