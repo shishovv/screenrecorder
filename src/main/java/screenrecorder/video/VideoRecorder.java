@@ -60,8 +60,7 @@ public class VideoRecorder implements Recorder {
     public void stopRecordingAndSave(@NotNull final String outFilePath) {
         stopRecording();
         try {
-            VideoMaker.newVideoMaker(outFilePath)
-                    .makeVideo(VideoParams.newParams(params.width, params.height, params.frameRate), new ArrayList<>(future.get()));
+            VideoMaker.newVideoMaker(outFilePath).makeVideo(params, new ArrayList<>(future.get()));
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }

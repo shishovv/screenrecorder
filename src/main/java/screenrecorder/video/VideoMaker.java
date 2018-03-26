@@ -68,20 +68,6 @@ public class VideoMaker implements ControllerListener, DataSinkListener {
         }
     }
 
-    private void releaseController(@NotNull final Controller controller) {
-        controller.stop();
-        controller.close();
-    }
-
-    private void notifyAllCompleted() {
-        lock.lock();
-        try {
-            completionCondition.signalAll();
-        } finally {
-            lock.unlock();
-        }
-    }
-
     private void startProcessing(@NotNull final Processor processor) {
         processor.addControllerListener(this);
         processor.configure();
@@ -116,13 +102,9 @@ public class VideoMaker implements ControllerListener, DataSinkListener {
         notifyAllCompleted();
     }
 
-    private DataSink createDateSink(@NotNull final Processor processor) {
-        try {
-            return Manager.createDataSink(processor.getDataOutput(),
-                    new MediaLocator("file:///" + outFile.toString()));
-        } catch (NoDataSinkException e) {
-            throw new RuntimeException(e);
-        }
+    private void releaseController(@NotNull final Controller controller) {
+        controller.stop();
+        controller.close();
     }
 
     private void awaitAllCompleted() {
@@ -138,11 +120,30 @@ public class VideoMaker implements ControllerListener, DataSinkListener {
         }
     }
 
+    private void notifyAllCompleted() {
+        lock.lock();
+        try {
+            completionCondition.signalAll();
+        } finally {
+            lock.unlock();
+        }
+    }
+
     @NotNull
     private Processor createProcessor(@NotNull final VideoParams params, @NotNull final List<BufferedImage> images) {
         try {
             return Manager.createProcessor(ImageDataSource.newDataDource(params, images));
         } catch (NoProcessorException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @NotNull
+    private DataSink createDateSink(@NotNull final Processor processor) {
+        try {
+            return Manager.createDataSink(processor.getDataOutput(),
+                    new MediaLocator("file:///" + outFile.toString()));
+        } catch (NoDataSinkException e) {
             throw new RuntimeException(e);
         }
     }
