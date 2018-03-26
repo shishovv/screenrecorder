@@ -53,16 +53,14 @@ public class VideoMaker implements ControllerListener, DataSinkListener {
         } else if (controllerEvent instanceof RealizeCompleteEvent) {
             onProcessorRealized((Processor) controllerEvent.getSourceController());
         } else if (controllerEvent instanceof EndOfMediaEvent) {
-            allCompleted = true;
-            releaseController(controllerEvent.getSourceController());
-            notifyAllCompleted();
+            onCompleted(controllerEvent.getSourceController());
         } else if (controllerEvent instanceof ResourceUnavailableEvent) {
             throw new RuntimeException();
         }
     }
 
     @Override
-    public void dataSinkUpdate(final DataSinkEvent dataSinkEvent) {
+    public void dataSinkUpdate(@NotNull final DataSinkEvent dataSinkEvent) {
         if (dataSinkEvent instanceof EndOfStreamEvent) {
             ((DataSink) dataSinkEvent.getSource()).close();
         } else if (dataSinkEvent instanceof DataSinkErrorEvent) {
@@ -110,6 +108,12 @@ public class VideoMaker implements ControllerListener, DataSinkListener {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private void onCompleted(@NotNull final Controller controller) {
+        allCompleted = true;
+        releaseController(controller);
+        notifyAllCompleted();
     }
 
     private DataSink createDateSink(@NotNull final Processor processor) {
