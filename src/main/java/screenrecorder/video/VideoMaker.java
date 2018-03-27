@@ -132,7 +132,7 @@ public class VideoMaker implements ControllerListener, DataSinkListener {
     @NotNull
     private Processor createProcessor(@NotNull final VideoParams params, @NotNull final List<BufferedImage> images) {
         try {
-            return Manager.createProcessor(ImageDataSource.newDataDource(params, images));
+            return Manager.createProcessor(ImageDataSource.newDataSource(params, images));
         } catch (NoProcessorException | IOException e) {
             throw new RuntimeException(e);
         }

@@ -18,7 +18,7 @@ class ImageDataSource extends PullBufferDataSource {
     }
 
     @NotNull
-    public static ImageDataSource newDataDource(@NotNull final VideoParams params, @NotNull final Iterable<BufferedImage> images) {
+    public static ImageDataSource newDataSource(@NotNull final VideoParams params, @NotNull final Iterable<BufferedImage> images) {
         final PullBufferStream[] streams = new PullBufferStream[1];
         streams[0] = ImageStream.newStream(params, images);
         return new ImageDataSource(streams);
