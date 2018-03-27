@@ -16,7 +16,7 @@ public class VideoRecorder implements Recorder {
 
     @NotNull
     private final VideoParams params;
-    private CompletableFuture<List<BufferedImage>> future;
+    private CompletableFuture<List<BufferedImage>> futureImages;
 
     private volatile boolean stopped;
 
@@ -37,7 +37,7 @@ public class VideoRecorder implements Recorder {
 
     @Override
     public void startRecording() {
-        future = CompletableFuture.supplyAsync(() -> {
+        futureImages = CompletableFuture.supplyAsync(() -> {
             final ScreenShotter screenShotter =
                     ScreenShotter.newInstance(new Rectangle(new Dimension(params.width, params.height)));
             final List<BufferedImage> images = new ArrayList<>(100);
@@ -50,7 +50,7 @@ public class VideoRecorder implements Recorder {
 
     @Override
     public void stopRecording() {
-        if (future == null) {
+        if (futureImages == null) {
             throw new IllegalStateException("not started");
         }
         stopped = true;
@@ -60,7 +60,7 @@ public class VideoRecorder implements Recorder {
     public void stopRecordingAndSave(@NotNull final String outFilePath) {
         stopRecording();
         try {
-            VideoMaker.newVideoMaker(outFilePath).makeVideo(params, new ArrayList<>(future.get()));
+            VideoMaker.newVideoMaker(outFilePath).makeVideo(params, futureImages.get());
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }
