@@ -7,7 +7,6 @@ import javax.media.protocol.ContentDescriptor;
 import javax.media.protocol.PullBufferDataSource;
 import javax.media.protocol.PullBufferStream;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 
 class ImageDataSource extends PullBufferDataSource {
 
