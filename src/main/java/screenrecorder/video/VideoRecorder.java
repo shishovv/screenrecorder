@@ -2,67 +2,86 @@ package screenrecorder.video;
 
 import org.jetbrains.annotations.NotNull;
 import screenrecorder.Recorder;
+import screenrecorder.util.CircularImageBuffer;
+import screenrecorder.util.Log;
+import screenrecorder.util.ScreenShotter;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 
 public class VideoRecorder implements Recorder {
 
-    private static final int DEFAULT_FRAMERATE = 5;
+    private static final int DEFAULT_FRAMERATE = 6;
+    private static final int TERMINATION_TIMEOUT_IN_SECONDS = 10;
 
     @NotNull
     private final VideoParams params;
-    private CompletableFuture<List<BufferedImage>> futureImages;
+    @NotNull
+    private final CircularImageBuffer imagesStorage;
+    @NotNull
+    private final ExecutorService executor;
 
     private volatile boolean stopped;
 
-    private VideoRecorder(@NotNull final VideoParams params) {
+    private VideoRecorder(@NotNull final VideoParams params, final long sizeLimit) {
         this.params = params;
+        this.imagesStorage = CircularImageBuffer.newBuffer(sizeLimit);
+        executor = Executors.newSingleThreadExecutor();
     }
 
     @NotNull
-    public static Recorder newRecorder() {
+    public static Recorder newRecorder(final int sizeLimit) {
         final Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
-        return new VideoRecorder(VideoParams.newParams(dimension.width, dimension.height, DEFAULT_FRAMERATE));
+        return new VideoRecorder(VideoParams.newParams(dimension.width, dimension.height, DEFAULT_FRAMERATE), sizeLimit);
     }
 
     @NotNull
-    public static Recorder newRecorder(@NotNull final VideoParams params) {
-        return new VideoRecorder(params);
+    public static Recorder newRecorder(@NotNull final VideoParams params, final int sizeLimit) {
+        return new VideoRecorder(params, sizeLimit);
     }
 
     @Override
     public void startRecording() {
-        futureImages = CompletableFuture.supplyAsync(() -> {
+        if (executor.isShutdown()) {
+            throw new IllegalStateException();
+        }
+        Log.i("start recording...");
+        executor.execute(() -> {
             final ScreenShotter screenShotter =
                     ScreenShotter.newInstance(new Rectangle(new Dimension(params.width, params.height)));
-            final List<BufferedImage> images = new ArrayList<>(100);
             while (!stopped) {
-                images.add(screenShotter.takeScreenshot());
+                imagesStorage.putAsync(screenShotter.takeScreenshot());
             }
-            return images;
         });
+    }
+
+    private void stop() {
+        Log.i("stop recording...");
+        stopped = true;
+        executor.shutdown();
+        try {
+            executor.awaitTermination(TERMINATION_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void stopRecording() {
-        if (futureImages == null) {
-            throw new IllegalStateException("not started");
+        try {
+            stop();
+        } finally {
+            imagesStorage.deleteImages();
         }
-        stopped = true;
     }
 
     @Override
     public void stopRecordingAndSave(@NotNull final String outFilePath) {
-        stopRecording();
         try {
-            VideoMaker.newVideoMaker(outFilePath).makeVideo(params, futureImages.get());
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
+            stop();
+            VideoMaker.newInstance(params).makeVideoAndSave(imagesStorage, outFilePath);
+        } finally {
+            imagesStorage.deleteImages();
         }
     }
 }

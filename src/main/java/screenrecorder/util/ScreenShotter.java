@@ -1,4 +1,4 @@
-package screenrecorder.video;
+package screenrecorder.util;
 
 import org.jetbrains.annotations.NotNull;
 

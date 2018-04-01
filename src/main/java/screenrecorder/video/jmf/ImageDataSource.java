@@ -1,12 +1,13 @@
-package screenrecorder.video;
+package screenrecorder.video.jmf;
 
 import org.jetbrains.annotations.NotNull;
+import screenrecorder.video.VideoParams;
 
 import javax.media.Time;
 import javax.media.protocol.ContentDescriptor;
 import javax.media.protocol.PullBufferDataSource;
 import javax.media.protocol.PullBufferStream;
-import java.awt.image.BufferedImage;
+import java.nio.file.Path;
 
 class ImageDataSource extends PullBufferDataSource {
 
@@ -18,7 +19,7 @@ class ImageDataSource extends PullBufferDataSource {
     }
 
     @NotNull
-    public static ImageDataSource newDataSource(@NotNull final VideoParams params, @NotNull final Iterable<BufferedImage> images) {
+    public static ImageDataSource newDataSource(@NotNull final VideoParams params, @NotNull final Iterable<Path> images) {
         final PullBufferStream[] streams = new PullBufferStream[1];
         streams[0] = ImageStream.newStream(params, images);
         return new ImageDataSource(streams);
