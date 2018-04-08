@@ -6,5 +6,5 @@ public interface Recorder {
 
     void startRecording();
     void stopRecording();
-    void stopRecordingAndSave(@NotNull final String outDir);
+    void stopRecordingAndSave(@NotNull final String outFilePath);
 }

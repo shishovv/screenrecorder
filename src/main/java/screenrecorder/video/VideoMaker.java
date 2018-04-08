@@ -14,8 +14,6 @@ import java.util.logging.Logger;
 
 public class VideoMaker {
 
-    private static final Logger LOG = Logger.getLogger(VideoMaker.class.getSimpleName());
-
     @NotNull
     private final VideoParams params;
 

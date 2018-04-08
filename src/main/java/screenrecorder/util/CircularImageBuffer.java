@@ -67,20 +67,20 @@ public class CircularImageBuffer implements Iterable<BufferedImage> {
     }
 
     @NotNull
-    private Path getNextPathToStore(final int dataSize) {
+    private Path getNextPathToStore(final int nextImageSize) {
         createFileIfNeeded(nextImagePathIndex);
         final Path next = pathsToImages.get(nextImagePathIndex);
-        updateIndices(dataSize);
+        updateIndices(nextImageSize);
         return next;
     }
 
-    private void updateIndices(final int dataSize) {
-        if (dataSize + imagesSize > imagesSizeLimit) {
+    private void updateIndices(final int imageSize) {
+        if (imageSize + imagesSize > imagesSizeLimit) {
             nextImagePathIndex = (nextImagePathIndex + 1) % pathsToImages.size();
             startIndex = (startIndex + 1) % pathsToImages.size();
             endIndex = (endIndex + 1) % pathsToImages.size();
         } else {
-            imagesSize += dataSize;
+            imagesSize += imageSize;
             ++nextImagePathIndex;
             if (startIndex == -1) {
                 startIndex = 0;
@@ -92,7 +92,8 @@ public class CircularImageBuffer implements Iterable<BufferedImage> {
     private void createFileIfNeeded(final int nextPathIndex) {
         if (nextPathIndex >= pathsToImages.size()) {
             try {
-                pathsToImages.add(Files.createFile(Paths.get(tmpImagesDir.toString(), String.valueOf(nextPathIndex))));
+                pathsToImages.add(
+                        Files.createFile(Paths.get(tmpImagesDir.toString(), String.valueOf(nextPathIndex))));
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
