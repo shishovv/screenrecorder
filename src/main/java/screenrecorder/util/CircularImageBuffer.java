@@ -20,6 +20,8 @@ import java.util.concurrent.TimeUnit;
 
 public class CircularImageBuffer implements Iterable<BufferedImage> {
 
+    private static final int TERMINATION_TIMEOUT_IN_SECONDS = 10;
+
     @NotNull
     private final Path tmpImagesDir;
     @NotNull
@@ -29,9 +31,10 @@ public class CircularImageBuffer implements Iterable<BufferedImage> {
     private final long imagesSizeLimit;
 
     private int nextImagePathIndex;
-    private long imagesSize;
+    private long totalSize;
     private int startIndex;
     private int endIndex;
+    private boolean sizeCalculated;
 
     private CircularImageBuffer(final long sizeLimit) {
         try {
@@ -75,12 +78,15 @@ public class CircularImageBuffer implements Iterable<BufferedImage> {
     }
 
     private void updateIndices(final int imageSize) {
-        if (imageSize + imagesSize > imagesSizeLimit) {
+        if (!sizeCalculated && imageSize + totalSize > imagesSizeLimit) {
+            sizeCalculated = true;
+        }
+        if (sizeCalculated) {
             nextImagePathIndex = (nextImagePathIndex + 1) % pathsToImages.size();
             startIndex = (startIndex + 1) % pathsToImages.size();
             endIndex = (endIndex + 1) % pathsToImages.size();
         } else {
-            imagesSize += imageSize;
+            totalSize += imageSize;
             ++nextImagePathIndex;
             if (startIndex == -1) {
                 startIndex = 0;
@@ -103,7 +109,7 @@ public class CircularImageBuffer implements Iterable<BufferedImage> {
     private void awaitAllTasksCompletion() {
         try {
             ioExecutor.shutdown();
-            ioExecutor.awaitTermination(10, TimeUnit.SECONDS);
+            ioExecutor.awaitTermination(TERMINATION_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -126,7 +132,7 @@ public class CircularImageBuffer implements Iterable<BufferedImage> {
 
         private int nextIndex;
 
-        ImageIterator(final int startIndex) {
+        private ImageIterator(final int startIndex) {
             nextIndex = startIndex;
         }
 
