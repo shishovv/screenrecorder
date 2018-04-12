@@ -10,7 +10,6 @@ import screenrecorder.util.Log;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.logging.Logger;
 
 public class VideoMaker {
 
