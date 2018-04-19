@@ -3,6 +3,7 @@ package screenrecorder.video;
 import org.jetbrains.annotations.NotNull;
 import screenrecorder.Recorder;
 import screenrecorder.util.CircularImageBuffer;
+import screenrecorder.util.ImageUtils;
 import screenrecorder.util.Log;
 import screenrecorder.util.ScreenShotter;
 
@@ -79,7 +80,7 @@ public class VideoRecorder implements Recorder {
     public void stopRecordingAndSave(@NotNull final String outFilePath) {
         try {
             stop();
-            VideoMaker.newInstance(params).makeVideoAndSave(imagesStorage, outFilePath);
+            VideoMaker.newInstance(params).makeVideoAndSave(ImageUtils.drawCursors(imagesStorage), outFilePath);
         } finally {
             imagesStorage.deleteImages();
         }

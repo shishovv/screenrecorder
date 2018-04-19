@@ -1,9 +1,9 @@
 package screenrecorder.util;
 
 import org.jetbrains.annotations.NotNull;
+import screenrecorder.image.ImageWithCursor;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 
 public class ScreenShotter {
 
@@ -27,7 +27,7 @@ public class ScreenShotter {
     }
 
     @NotNull
-    public BufferedImage takeScreenshot() {
-        return robot.createScreenCapture(rectangle);
+    public ImageWithCursor takeScreenshot() {
+        return ImageWithCursor.newImage(robot.createScreenCapture(rectangle), MouseInfo.getPointerInfo().getLocation());
     }
 }
