@@ -9,6 +9,12 @@ repositories {
     mavenCentral()
 }
 
+jar {
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
 dependencies {
     compile 'org.jetbrains:annotations:15.0'
     compile 'javax.media:jmf:2.1.1e'
