@@ -5,13 +5,15 @@ import org.jcodec.common.io.NIOUtils;
 import org.jcodec.common.io.SeekableByteChannel;
 import org.jcodec.common.model.Rational;
 import org.jetbrains.annotations.NotNull;
-import screenrecorder.util.Log;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.logging.Logger;
 
-public class VideoMaker {
+class VideoMaker {
+
+    private static final Logger LOG = Logger.getLogger(VideoMaker.class.getSimpleName());
 
     @NotNull
     private final VideoParams params;
@@ -20,13 +22,13 @@ public class VideoMaker {
         this.params = params;
     }
 
-    public static VideoMaker newInstance(@NotNull final VideoParams params) {
+    static VideoMaker newInstance(@NotNull final VideoParams params) {
         return new VideoMaker(params);
     }
 
-    public void makeVideoAndSave(@NotNull Iterable<BufferedImage> images,
-                                 @NotNull String outFile) {
-        Log.i("start making video...");
+    void makeVideoAndSave(@NotNull Iterable<BufferedImage> images,
+                          @NotNull String outFile) {
+        LOG.info("start making video...");
         SeekableByteChannel out = null;
         try {
             out = NIOUtils.writableFileChannel(outFile);

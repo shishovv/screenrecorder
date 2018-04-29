@@ -2,15 +2,16 @@ package screenrecorder.video;
 
 import org.jetbrains.annotations.NotNull;
 import screenrecorder.Recorder;
-import screenrecorder.util.CircularImageBuffer;
 import screenrecorder.util.ImageUtils;
-import screenrecorder.util.Log;
 import screenrecorder.util.ScreenShotter;
 
 import java.awt.*;
 import java.util.concurrent.*;
+import java.util.logging.Logger;
 
-public class VideoRecorder implements Recorder {
+public class ScreenRecorder implements Recorder {
+
+    private static final Logger LOG = Logger.getLogger(ScreenRecorder.class.getSimpleName());
 
     private static final int DEFAULT_FRAMERATE = 6;
     private static final int TERMINATION_TIMEOUT_IN_SECONDS = 10;
@@ -24,7 +25,7 @@ public class VideoRecorder implements Recorder {
 
     private volatile boolean stopped;
 
-    private VideoRecorder(@NotNull final VideoParams params, final long sizeLimit) {
+    private ScreenRecorder(@NotNull final VideoParams params, final long sizeLimit) {
         this.params = params;
         this.imagesStorage = CircularImageBuffer.newBuffer(sizeLimit);
         executor = Executors.newSingleThreadExecutor();
@@ -33,12 +34,12 @@ public class VideoRecorder implements Recorder {
     @NotNull
     public static Recorder newRecorder(final int sizeLimit) {
         final Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
-        return new VideoRecorder(VideoParams.newParams(dimension.width, dimension.height, DEFAULT_FRAMERATE), sizeLimit);
+        return new ScreenRecorder(VideoParams.newParams(dimension.width, dimension.height, DEFAULT_FRAMERATE), sizeLimit);
     }
 
     @NotNull
     public static Recorder newRecorder(@NotNull final VideoParams params, final int sizeLimit) {
-        return new VideoRecorder(params, sizeLimit);
+        return new ScreenRecorder(params, sizeLimit);
     }
 
     @Override
@@ -46,7 +47,7 @@ public class VideoRecorder implements Recorder {
         if (executor.isShutdown()) {
             throw new IllegalStateException();
         }
-        Log.i("start recording...");
+        LOG.info("start recording...");
         executor.execute(() -> {
             final ScreenShotter screenShotter =
                     ScreenShotter.newInstance(new Rectangle(new Dimension(params.width, params.height)));
@@ -57,7 +58,7 @@ public class VideoRecorder implements Recorder {
     }
 
     private void stop() {
-        Log.i("stop recording...");
+        LOG.info("stop recording...");
         stopped = true;
         executor.shutdown();
         try {

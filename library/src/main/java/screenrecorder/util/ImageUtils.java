@@ -14,8 +14,8 @@ import java.util.List;
 
 public class ImageUtils {
 
-    private static final Color RED_COLOR = new Color(255, 0, 0);
-    private static final int CURSOR_SIZE = 8;
+    private static final Color DEFAULT_CURSOR_COLOR = new Color(255, 0, 0);
+    private static final int DEFAULT_CURSOR_SIZE = 8;
 
     private ImageUtils() {}
 
@@ -40,8 +40,8 @@ public class ImageUtils {
     @NotNull
     private static BufferedImage drawCursor(@NotNull final ImageWithCursor image) {
         final Graphics graphics = image.img.getGraphics();
-        graphics.setColor(RED_COLOR);
-        graphics.fillRect(image.mousePosition.x, image.mousePosition.y, CURSOR_SIZE, CURSOR_SIZE);
+        graphics.setColor(DEFAULT_CURSOR_COLOR);
+        graphics.fillRect(image.mousePosition.x, image.mousePosition.y, DEFAULT_CURSOR_SIZE, DEFAULT_CURSOR_SIZE);
         return image.img;
     }
 }

@@ -1,7 +1,9 @@
-package screenrecorder.util;
+package screenrecorder.video;
 
 import org.jetbrains.annotations.NotNull;
 import screenrecorder.image.ImageWithCursor;
+import screenrecorder.util.FileUtils;
+import screenrecorder.util.ImageUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -19,8 +21,11 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
-public class CircularImageBuffer implements Iterable<ImageWithCursor> {
+class CircularImageBuffer implements Iterable<ImageWithCursor> {
+
+    private static final Logger LOG = Logger.getLogger(CircularImageBuffer.class.getSimpleName());
 
     private static final int TERMINATION_TIMEOUT_IN_SECONDS = 10;
 
@@ -52,11 +57,11 @@ public class CircularImageBuffer implements Iterable<ImageWithCursor> {
     }
 
     @NotNull
-    public static CircularImageBuffer newBuffer(final long sizeLimit) {
+    static CircularImageBuffer newBuffer(final long sizeLimit) {
         return new CircularImageBuffer(sizeLimit);
     }
 
-    public void putAsync(@NotNull final ImageWithCursor image) {
+    void putAsync(@NotNull final ImageWithCursor image) {
         if (ioExecutor.isShutdown()) {
             throw new IllegalStateException();
         }
@@ -120,8 +125,8 @@ public class CircularImageBuffer implements Iterable<ImageWithCursor> {
         }
     }
 
-    public void deleteImages() {
-        Log.i("deleting images...");
+    void deleteImages() {
+        LOG.info("deleting images...");
         awaitAllTasksCompletion();
         FileUtils.deleteDir(tmpImagesDir);
     }
