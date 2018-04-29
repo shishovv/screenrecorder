@@ -1,0 +1,7 @@
+apply plugin: 'application'
+
+mainClassName = "Sample"
+
+dependencies {
+    compile project(':library')
+}
