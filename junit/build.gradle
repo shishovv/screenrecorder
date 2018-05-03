@@ -1,0 +1,10 @@
+jar {
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+dependencies {
+    compile project(':library')
+    compile group: 'junit', name: 'junit', version: '4.12'
+}

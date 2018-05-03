@@ -1,4 +1,5 @@
 rootProject.name = 'screenrecorder'
 include 'library'
 include 'sample'
+include 'junit'
 
