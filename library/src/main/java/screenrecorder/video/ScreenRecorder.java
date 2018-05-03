@@ -25,21 +25,21 @@ public class ScreenRecorder implements Recorder {
 
     private volatile boolean stopped;
 
-    private ScreenRecorder(@NotNull final VideoParams params, final int videoLength, @NotNull final TimeUnit timeUnit) {
+    private ScreenRecorder(@NotNull final VideoParams params, final int videoDuration, @NotNull final TimeUnit timeUnit) {
         this.params = params;
-        this.imagesStorage = CircularImageBuffer.newBuffer((int) timeUnit.toSeconds(videoLength) * params.frameRate);
+        this.imagesStorage = CircularImageBuffer.newBuffer((int) timeUnit.toSeconds(videoDuration) * params.frameRate);
         executor = Executors.newSingleThreadExecutor();
     }
 
     @NotNull
-    public static Recorder newRecorder(final int videoLength, @NotNull final TimeUnit timeUnit) {
+    public static Recorder newRecorder(final int videoDuration, @NotNull final TimeUnit timeUnit) {
         final Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
-        return new ScreenRecorder(VideoParams.newParams(dimension.width, dimension.height, DEFAULT_FRAMERATE), videoLength, timeUnit);
+        return new ScreenRecorder(VideoParams.newParams(dimension.width, dimension.height, DEFAULT_FRAMERATE), videoDuration, timeUnit);
     }
 
     @NotNull
-    public static Recorder newRecorder(@NotNull final VideoParams params, final int sizeLimit, @NotNull final TimeUnit timeUnit) {
-        return new ScreenRecorder(params, sizeLimit, timeUnit);
+    public static Recorder newRecorder(@NotNull final VideoParams params, final int videoDuration, @NotNull final TimeUnit timeUnit) {
+        return new ScreenRecorder(params, videoDuration, timeUnit);
     }
 
     @Override
