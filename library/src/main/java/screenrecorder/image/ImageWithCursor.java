@@ -8,14 +8,14 @@ import java.awt.image.BufferedImage;
 public class ImageWithCursor {
 
     public final BufferedImage img;
-    public final Point mousePosition;
+    public final Point cursorPosition;
 
-    private ImageWithCursor(@NotNull final BufferedImage img, @NotNull final Point mousePosition) {
+    private ImageWithCursor(@NotNull final BufferedImage img, @NotNull final Point cursorPosition) {
         this.img = img;
-        this.mousePosition = mousePosition;
+        this.cursorPosition = cursorPosition;
     }
 
-    public static ImageWithCursor newImage(@NotNull final BufferedImage image, @NotNull final Point mousePosition) {
-        return new ImageWithCursor(image, mousePosition);
+    public static ImageWithCursor newImage(@NotNull final BufferedImage image, @NotNull final Point cursorPosition) {
+        return new ImageWithCursor(image, cursorPosition);
     }
 }

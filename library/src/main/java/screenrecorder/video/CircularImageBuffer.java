@@ -15,9 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -31,34 +29,26 @@ class CircularImageBuffer implements Iterable<ImageWithCursor> {
 
     @NotNull
     private final Path tmpImagesDir;
-    @NotNull
-    private final List<Entry> entries;
+    private final Entry @NotNull [] entries;
     @NotNull
     private final ExecutorService ioExecutor;
-    private final long imagesSizeLimit;
 
-    private int nextImagePathIndex;
-    private long totalSize;
-    private int startIndex;
-    private int endIndex;
-    private boolean bufferSizeCalculated;
+    private int firstIndex;
+    private int size;
 
-    private CircularImageBuffer(final long sizeLimit) {
+    private CircularImageBuffer(final int capacity) {
         try {
             tmpImagesDir = Files.createTempDirectory(getClass().getSimpleName());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-        entries = new ArrayList<>();
+        entries = new Entry[capacity];
         ioExecutor = Executors.newSingleThreadExecutor();
-        imagesSizeLimit = sizeLimit;
-        startIndex = -1;
-        endIndex = -1;
     }
 
     @NotNull
-    static CircularImageBuffer newBuffer(final long sizeLimit) {
-        return new CircularImageBuffer(sizeLimit);
+    static CircularImageBuffer newBuffer(final int capacity) {
+        return new CircularImageBuffer(capacity);
     }
 
     void putAsync(@NotNull final ImageWithCursor image) {
@@ -66,10 +56,10 @@ class CircularImageBuffer implements Iterable<ImageWithCursor> {
             throw new IllegalStateException();
         }
         ioExecutor.execute(() -> {
-            final byte[] bytes = ImageUtils.toByteArray(image.img);
-            final Entry entry = nextEntry(bytes.length, image.mousePosition);
+            final Entry entry = nextEntry();
+            entry.cursorPos = image.cursorPosition;
             try (final OutputStream out = Files.newOutputStream(entry.imagePath, StandardOpenOption.WRITE)) {
-                out.write(bytes);
+                out.write(ImageUtils.toByteArray(image.img));
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -77,42 +67,32 @@ class CircularImageBuffer implements Iterable<ImageWithCursor> {
     }
 
     @NotNull
-    private Entry nextEntry(final int nextImageSize, @NotNull final Point mousePos) {
-        updateEntry(nextImagePathIndex, mousePos);
-        final Entry next = entries.get(nextImagePathIndex);
-        updateIndices(nextImageSize);
-        return next;
+    private Entry nextEntry() {
+        final int nextIndex = normalizeIndex(firstIndex + size);
+        createEntryIfNeeded(nextIndex);
+
+        if (size != 0 && nextIndex == firstIndex) {
+            firstIndex = normalizeIndex(firstIndex + 1);
+        }
+        if (size < capacity()) {
+            ++size;
+        }
+
+        return entries[nextIndex];
     }
 
-    private void updateIndices(final int imageSize) {
-        if (!bufferSizeCalculated && imageSize + totalSize > imagesSizeLimit) {
-            bufferSizeCalculated = true;
-        }
-        if (bufferSizeCalculated) {
-            nextImagePathIndex = (nextImagePathIndex + 1) % entries.size();
-            startIndex = (startIndex + 1) % entries.size();
-            endIndex = (endIndex + 1) % entries.size();
-        } else {
-            totalSize += imageSize;
-            ++nextImagePathIndex;
-            if (startIndex == -1) {
-                startIndex = 0;
-            }
-            ++endIndex;
-        }
+    private int normalizeIndex(int index) {
+        return index < capacity() ? index : index % capacity();
     }
 
-    private void updateEntry(final int nextPathIndex, @NotNull final Point mousePos) {
-        if (nextPathIndex >= entries.size()) {
-            try {
-                entries.add(Entry.newEntry(
-                        Files.createFile(Paths.get(tmpImagesDir.toString(), String.valueOf(nextPathIndex))),
-                        mousePos));
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
+    private void createEntryIfNeeded(final int index) {
+        try {
+            if (entries[index] == null) {
+                final Path path = Files.createFile(Paths.get(tmpImagesDir.toString(), String.valueOf(index)));
+                entries[index] = new Entry(path);
             }
-        } else {
-            entries.get(nextPathIndex).mousePos = mousePos;
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -131,36 +111,37 @@ class CircularImageBuffer implements Iterable<ImageWithCursor> {
         FileUtils.deleteDir(tmpImagesDir);
     }
 
+    private int capacity() {
+        return entries.length;
+    }
+
     @NotNull
     @Override
     public Iterator<ImageWithCursor> iterator() {
         awaitAllTasksCompletion();
-        return new ImageIterator(startIndex);
+        return new ImageIterator();
     }
 
     private class ImageIterator implements Iterator<ImageWithCursor> {
 
-        private int nextIndex;
-
-        private ImageIterator(final int startIndex) {
-            nextIndex = startIndex;
-        }
+        private int count;
 
         @Override
         public boolean hasNext() {
-            return nextIndex != endIndex;
+            return count < size;
         }
 
         @Override
         public ImageWithCursor next() {
-            final ImageWithCursor next = ImageWithCursor.newImage(getImage(nextIndex), entries.get(nextIndex).mousePos);
-            nextIndex = (nextIndex + 1) % entries.size();
+            final int nextIndex = normalizeIndex(firstIndex + count);
+            final ImageWithCursor next = ImageWithCursor.newImage(getImage(nextIndex), entries[nextIndex].cursorPos);
+            ++count;
             return next;
         }
 
         private BufferedImage getImage(final int index) {
             try {
-                return ImageIO.read(entries.get(index).imagePath.toFile());
+                return ImageIO.read(entries[index].imagePath.toFile());
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -169,18 +150,16 @@ class CircularImageBuffer implements Iterable<ImageWithCursor> {
 
     private static class Entry {
 
+        static final Point ZERO = new Point(0, 0);
+
         @NotNull
         final Path imagePath;
         @NotNull
-        Point mousePos;
+        Point cursorPos;
 
-        private Entry(@NotNull final Path imagePath, @NotNull final Point mousePos) {
+        Entry(@NotNull final Path imagePath) {
             this.imagePath = imagePath;
-            this.mousePos = mousePos;
-        }
-
-        static Entry newEntry(@NotNull final Path imagePath, @NotNull final Point mousePos) {
-            return new Entry(imagePath, mousePos);
+            this.cursorPos = ZERO;
         }
     }
 }

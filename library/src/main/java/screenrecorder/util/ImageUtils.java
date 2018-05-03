@@ -41,7 +41,7 @@ public class ImageUtils {
     private static BufferedImage drawCursor(@NotNull final ImageWithCursor image) {
         final Graphics graphics = image.img.getGraphics();
         graphics.setColor(DEFAULT_CURSOR_COLOR);
-        graphics.fillRect(image.mousePosition.x, image.mousePosition.y, DEFAULT_CURSOR_SIZE, DEFAULT_CURSOR_SIZE);
+        graphics.fillRect(image.cursorPosition.x, image.cursorPosition.y, DEFAULT_CURSOR_SIZE, DEFAULT_CURSOR_SIZE);
         return image.img;
     }
 }

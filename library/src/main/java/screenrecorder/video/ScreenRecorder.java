@@ -25,21 +25,21 @@ public class ScreenRecorder implements Recorder {
 
     private volatile boolean stopped;
 
-    private ScreenRecorder(@NotNull final VideoParams params, final long sizeLimit) {
+    private ScreenRecorder(@NotNull final VideoParams params, final int videoLength, @NotNull final TimeUnit timeUnit) {
         this.params = params;
-        this.imagesStorage = CircularImageBuffer.newBuffer(sizeLimit);
+        this.imagesStorage = CircularImageBuffer.newBuffer((int) timeUnit.toSeconds(videoLength) * params.frameRate);
         executor = Executors.newSingleThreadExecutor();
     }
 
     @NotNull
-    public static Recorder newRecorder(final int sizeLimit) {
+    public static Recorder newRecorder(final int videoLength, @NotNull final TimeUnit timeUnit) {
         final Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
-        return new ScreenRecorder(VideoParams.newParams(dimension.width, dimension.height, DEFAULT_FRAMERATE), sizeLimit);
+        return new ScreenRecorder(VideoParams.newParams(dimension.width, dimension.height, DEFAULT_FRAMERATE), videoLength, timeUnit);
     }
 
     @NotNull
-    public static Recorder newRecorder(@NotNull final VideoParams params, final int sizeLimit) {
-        return new ScreenRecorder(params, sizeLimit);
+    public static Recorder newRecorder(@NotNull final VideoParams params, final int sizeLimit, @NotNull final TimeUnit timeUnit) {
+        return new ScreenRecorder(params, sizeLimit, timeUnit);
     }
 
     @Override
