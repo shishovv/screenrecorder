@@ -50,7 +50,7 @@ public class ScreenRecorder implements Recorder {
         LOG.info("start recording...");
         executor.execute(() -> {
             final Screenshotter screenshotter =
-                    Screenshotter.newInstance(new Rectangle(new Dimension(params.width, params.height)));
+                    Screenshotter.newInstance(params.captureArea);
             while (!stopped) {
                 imagesStorage.putAsync(screenshotter.takeScreenshot());
             }
