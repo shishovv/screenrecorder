@@ -13,7 +13,7 @@ public class ScreenRecorder implements Recorder {
 
     private static final Logger LOG = Logger.getLogger(ScreenRecorder.class.getSimpleName());
 
-    private static final int DEFAULT_FRAMERATE = 5;
+    private static final int DEFAULT_FRAMERATE = 7;
     private static final int TERMINATION_TIMEOUT_IN_SECONDS = 10;
 
     @NotNull
