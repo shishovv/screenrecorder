@@ -6,6 +6,8 @@ import screenrecorder.Recorder;
 import screenrecorder.video.ScreenRecorder;
 
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
 public class VideoRecorderRule extends TestWatcher {
@@ -25,7 +27,11 @@ public class VideoRecorderRule extends TestWatcher {
 
     @Override
     protected void failed(Throwable e, Description description) {
-        final String outFile = Paths.get(outDir, description.getMethodName() + ".mov").toString();
+        final String fileName = description.getMethodName()
+                + "_"
+                + LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+                + ".mov";
+        final String outFile = Paths.get(outDir, fileName).toString();
         recorder.stopRecordingAndSave(outFile);
     }
 
