@@ -81,7 +81,7 @@ public class ScreenRecorder implements Recorder {
     public void stopRecordingAndSave(@NotNull final String outFilePath) {
         try {
             stop();
-            VideoMaker.newInstance(params).makeVideoAndSave(ImageUtils.drawCursors(imagesStorage), outFilePath);
+            VideoMaker.newInstance(params).makeVideoAndSave(imagesStorage, outFilePath);
         } finally {
             imagesStorage.deleteImages();
         }

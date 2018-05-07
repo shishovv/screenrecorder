@@ -21,7 +21,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-class CircularImageBuffer implements Iterable<ImageWithCursor> {
+class CircularImageBuffer implements Iterable<BufferedImage> {
 
     private static final Logger LOG = Logger.getLogger(CircularImageBuffer.class.getSimpleName());
 
@@ -117,12 +117,12 @@ class CircularImageBuffer implements Iterable<ImageWithCursor> {
 
     @NotNull
     @Override
-    public Iterator<ImageWithCursor> iterator() {
+    public Iterator<BufferedImage> iterator() {
         awaitAllTasksCompletion();
         return new ImageIterator();
     }
 
-    private class ImageIterator implements Iterator<ImageWithCursor> {
+    private class ImageIterator implements Iterator<BufferedImage> {
 
         private int count;
 
@@ -132,11 +132,11 @@ class CircularImageBuffer implements Iterable<ImageWithCursor> {
         }
 
         @Override
-        public ImageWithCursor next() {
+        public BufferedImage next() {
             final int nextIndex = normalizeIndex(firstIndex + count);
             final ImageWithCursor next = ImageWithCursor.newImage(getImage(nextIndex), entries[nextIndex].cursorPos);
             ++count;
-            return next;
+            return ImageUtils.drawCursor(next);
         }
 
         private BufferedImage getImage(final int index) {

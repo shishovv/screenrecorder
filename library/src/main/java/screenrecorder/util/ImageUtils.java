@@ -29,16 +29,7 @@ public class ImageUtils {
     }
 
     @NotNull
-    public static List<BufferedImage> drawCursors(@NotNull final Iterable<ImageWithCursor> images) {
-        final List<BufferedImage> imgs = new ArrayList<>();
-        for (ImageWithCursor image : images) {
-            imgs.add(drawCursor(image));
-        }
-        return imgs;
-    }
-
-    @NotNull
-    private static BufferedImage drawCursor(@NotNull final ImageWithCursor image) {
+    public static BufferedImage drawCursor(@NotNull final ImageWithCursor image) {
         final Graphics graphics = image.img.getGraphics();
         graphics.setColor(DEFAULT_CURSOR_COLOR);
         graphics.fillRect(image.cursorPosition.x, image.cursorPosition.y, DEFAULT_CURSOR_SIZE, DEFAULT_CURSOR_SIZE);
