@@ -3,7 +3,7 @@ package screenrecorder.video;
 import org.jetbrains.annotations.NotNull;
 import screenrecorder.Recorder;
 import screenrecorder.util.ImageUtils;
-import screenrecorder.util.ScreenShotter;
+import screenrecorder.util.Screenshotter;
 
 import java.awt.*;
 import java.util.concurrent.*;
@@ -49,10 +49,10 @@ public class ScreenRecorder implements Recorder {
         }
         LOG.info("start recording...");
         executor.execute(() -> {
-            final ScreenShotter screenShotter =
-                    ScreenShotter.newInstance(new Rectangle(new Dimension(params.width, params.height)));
+            final Screenshotter screenshotter =
+                    Screenshotter.newInstance(new Rectangle(new Dimension(params.width, params.height)));
             while (!stopped) {
-                imagesStorage.putAsync(screenShotter.takeScreenshot());
+                imagesStorage.putAsync(screenshotter.takeScreenshot());
             }
         });
     }

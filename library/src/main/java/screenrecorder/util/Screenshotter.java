@@ -5,22 +5,22 @@ import screenrecorder.image.ImageWithCursor;
 
 import java.awt.*;
 
-public class ScreenShotter {
+public class Screenshotter {
 
     @NotNull
     private final Robot robot;
     @NotNull
     private final Rectangle rectangle;
 
-    private ScreenShotter(@NotNull final Robot robot, @NotNull final Rectangle rectangle) {
+    private Screenshotter(@NotNull final Robot robot, @NotNull final Rectangle rectangle) {
         this.robot = robot;
         this.rectangle = rectangle;
     }
 
     @NotNull
-    public static ScreenShotter newInstance(@NotNull final Rectangle rectangle) {
+    public static Screenshotter newInstance(@NotNull final Rectangle rectangle) {
         try {
-            return new ScreenShotter(new Robot(), rectangle);
+            return new Screenshotter(new Robot(), rectangle);
         } catch (AWTException e) {
             throw new RuntimeException(e);
         }
