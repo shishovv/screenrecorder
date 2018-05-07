@@ -58,8 +58,8 @@ class CircularImageBuffer implements Iterable<ImageWithCursor> {
         ioExecutor.execute(() -> {
             final Entry entry = nextEntry();
             entry.cursorPos = image.cursorPosition;
-            try (final OutputStream out = Files.newOutputStream(entry.imagePath, StandardOpenOption.WRITE)) {
-                out.write(ImageUtils.toByteArray(image.img));
+            try {
+                ImageIO.write(image.img, "jpg", Files.newOutputStream(entry.imagePath, StandardOpenOption.WRITE));
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
