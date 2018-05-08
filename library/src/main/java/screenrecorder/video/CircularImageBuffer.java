@@ -25,6 +25,7 @@ class CircularImageBuffer implements Iterable<BufferedImage> {
 
     private static final Logger LOG = Logger.getLogger(CircularImageBuffer.class.getSimpleName());
 
+    private static final String IMAGE_FORMAT = "jpg";
     private static final int TERMINATION_TIMEOUT_IN_SECONDS = 10;
 
     @NotNull
@@ -59,7 +60,7 @@ class CircularImageBuffer implements Iterable<BufferedImage> {
             final Entry entry = nextEntry();
             entry.cursorPos = image.cursorPosition;
             try {
-                ImageIO.write(image.img, "jpg", Files.newOutputStream(entry.imagePath, StandardOpenOption.WRITE));
+                ImageIO.write(image.img, IMAGE_FORMAT, Files.newOutputStream(entry.imagePath, StandardOpenOption.WRITE));
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
