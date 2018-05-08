@@ -4,35 +4,29 @@ import org.jetbrains.annotations.NotNull;
 import screenrecorder.image.ImageWithCursor;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ImageUtils {
 
-    private static final Color DEFAULT_CURSOR_COLOR = new Color(255, 0, 0);
-    private static final int DEFAULT_CURSOR_SIZE = 8;
+    private static final String CURSOR_RES = "images/cursor.png";
 
     private ImageUtils() {}
 
-    public static byte[] toByteArray(final BufferedImage image) {
-        try (final ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            ImageIO.write(image, "jpg", baos);
-            return baos.toByteArray();
+    @NotNull
+    public static BufferedImage drawCursor(@NotNull final ImageWithCursor image) {
+        try {
+            final BufferedImage cursorImg = ImageIO.read(FileUtils.getResourcePath(ImageUtils.class, CURSOR_RES).toFile());
+            image.img.getGraphics()
+                    .drawImage(cursorImg,
+                            image.cursorPosition.x - cursorImg.getWidth() / 2,
+                            image.cursorPosition.y - cursorImg.getHeight() / 2,
+                            null);
+            return image.img;
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-    }
-
-    @NotNull
-    public static BufferedImage drawCursor(@NotNull final ImageWithCursor image) {
-        final Graphics graphics = image.img.getGraphics();
-        graphics.setColor(DEFAULT_CURSOR_COLOR);
-        graphics.fillRect(image.cursorPosition.x, image.cursorPosition.y, DEFAULT_CURSOR_SIZE, DEFAULT_CURSOR_SIZE);
-        return image.img;
     }
 }
