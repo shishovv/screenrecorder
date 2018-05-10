@@ -1,7 +1,7 @@
 package screenrecorder.video;
 
 import org.jetbrains.annotations.NotNull;
-import screenrecorder.image.ImageWithCursor;
+import screenrecorder.image.ImageWithCursorPositions;
 import screenrecorder.util.FileUtils;
 import screenrecorder.util.ImageUtils;
 
@@ -9,7 +9,6 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -52,13 +51,13 @@ class CircularImageBuffer implements Iterable<BufferedImage> {
         return new CircularImageBuffer(capacity);
     }
 
-    void putAsync(@NotNull final ImageWithCursor image) {
+    void putAsync(@NotNull final ImageWithCursorPositions image) {
         if (ioExecutor.isShutdown()) {
             throw new IllegalStateException();
         }
         ioExecutor.execute(() -> {
             final Entry entry = nextEntry();
-            entry.cursorPos = image.cursorPosition;
+            entry.cursorPos = image.cursorPositions;
             try {
                 ImageIO.write(image.img, IMAGE_FORMAT, Files.newOutputStream(entry.imagePath, StandardOpenOption.WRITE));
             } catch (IOException e) {
@@ -126,6 +125,7 @@ class CircularImageBuffer implements Iterable<BufferedImage> {
     private class ImageIterator implements Iterator<BufferedImage> {
 
         private int count;
+        private int nextCursorIndex;
 
         @Override
         public boolean hasNext() {
@@ -135,9 +135,14 @@ class CircularImageBuffer implements Iterable<BufferedImage> {
         @Override
         public BufferedImage next() {
             final int nextIndex = normalizeIndex(firstIndex + count);
-            final ImageWithCursor next = ImageWithCursor.newImage(getImage(nextIndex), entries[nextIndex].cursorPos);
-            ++count;
-            return ImageUtils.drawCursor(next);
+            final ImageWithCursorPositions next = ImageWithCursorPositions.newImage(getImage(nextIndex), entries[nextIndex].cursorPos);
+            final int nextCursor = nextCursorIndex;
+            ++nextCursorIndex;
+            if (nextCursorIndex >= next.cursorPositions.length) {
+                ++count;
+                nextCursorIndex = 0;
+            }
+            return ImageUtils.drawCursor(next.img, next.cursorPositions[nextCursor]);
         }
 
         private BufferedImage getImage(final int index) {
@@ -156,11 +161,11 @@ class CircularImageBuffer implements Iterable<BufferedImage> {
         @NotNull
         final Path imagePath;
         @NotNull
-        Point cursorPos;
+        Point[] cursorPos;
 
         Entry(@NotNull final Path imagePath) {
             this.imagePath = imagePath;
-            this.cursorPos = ZERO;
+            this.cursorPos = new Point[]{ZERO};
         }
     }
 }

@@ -1,9 +1,10 @@
 package screenrecorder.util;
 
 import org.jetbrains.annotations.NotNull;
-import screenrecorder.image.ImageWithCursor;
+import screenrecorder.image.ImageWithCursorPositions;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 public class Screenshotter {
 
@@ -27,7 +28,12 @@ public class Screenshotter {
     }
 
     @NotNull
-    public ImageWithCursor takeScreenshot() {
-        return ImageWithCursor.newImage(robot.createScreenCapture(rectangle), MouseInfo.getPointerInfo().getLocation());
+    public ImageWithCursorPositions takeScreenshot() {
+        final Point p1 = MouseInfo.getPointerInfo().getLocation();
+        final Point p2 = MouseInfo.getPointerInfo().getLocation();
+        final BufferedImage img = robot.createScreenCapture(rectangle);
+        final Point p3 = MouseInfo.getPointerInfo().getLocation();
+        final Point p4 = MouseInfo.getPointerInfo().getLocation();
+        return ImageWithCursorPositions.newImage(img, new Point[]{p1, p2, p3, p4});
     }
 }

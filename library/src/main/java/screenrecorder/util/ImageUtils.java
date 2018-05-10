@@ -1,11 +1,10 @@
 package screenrecorder.util;
 
 import org.jetbrains.annotations.NotNull;
-import screenrecorder.image.ImageWithCursor;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
@@ -16,15 +15,15 @@ public class ImageUtils {
     private ImageUtils() {}
 
     @NotNull
-    public static BufferedImage drawCursor(@NotNull final ImageWithCursor image) {
+    public static BufferedImage drawCursor(@NotNull final BufferedImage image, @NotNull final Point cursorPos) {
         try {
             final BufferedImage cursorImg = ImageIO.read(FileUtils.getResourcePath(ImageUtils.class, CURSOR_RES).toFile());
-            image.img.getGraphics()
+            image.getGraphics()
                     .drawImage(cursorImg,
-                            image.cursorPosition.x - cursorImg.getWidth() / 2,
-                            image.cursorPosition.y - cursorImg.getHeight() / 2,
+                            cursorPos.x - cursorImg.getWidth() / 2,
+                            cursorPos.y - cursorImg.getHeight() / 2,
                             null);
-            return image.img;
+            return image;
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
