@@ -1,9 +1,6 @@
 package screenrecorder.video;
 
 import org.jcodec.api.awt.AWTSequenceEncoder;
-import org.jcodec.common.io.NIOUtils;
-import org.jcodec.common.io.SeekableByteChannel;
-import org.jcodec.common.model.Rational;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.image.BufferedImage;
