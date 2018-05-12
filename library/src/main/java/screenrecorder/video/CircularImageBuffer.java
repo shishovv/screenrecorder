@@ -9,6 +9,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,11 +21,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import static screenrecorder.util.Require.require;
+
 class CircularImageBuffer implements Iterable<BufferedImage> {
 
     private static final Logger LOG = Logger.getLogger(CircularImageBuffer.class.getSimpleName());
 
     private static final String IMAGE_FORMAT = "jpg";
+    private static final float COMPRESSION_QUALITY = 0.2f;
     private static final int TERMINATION_TIMEOUT_IN_SECONDS = 10;
 
     @NotNull
@@ -52,14 +56,18 @@ class CircularImageBuffer implements Iterable<BufferedImage> {
     }
 
     void putAsync(@NotNull final ImageWithCursorPositions image) {
-        if (ioExecutor.isShutdown()) {
-            throw new IllegalStateException();
-        }
+        require(!ioExecutor.isShutdown(), "cannot perform this action");
+
+        final Entry entry = nextEntry();
+        entry.cursorPositions = image.cursorPositions;
+        writeAsync(image.img, entry.imagePath);
+    }
+
+    private void writeAsync(@NotNull final BufferedImage image, @NotNull final Path path) {
         ioExecutor.execute(() -> {
-            final Entry entry = nextEntry();
-            entry.cursorPos = image.cursorPositions;
-            try {
-                ImageIO.write(image.img, IMAGE_FORMAT, Files.newOutputStream(entry.imagePath, StandardOpenOption.WRITE));
+            FileUtils.createFileIfNotExists(path);
+            try (final OutputStream outputStream = Files.newOutputStream(path, StandardOpenOption.WRITE)) {
+                ImageUtils.writeCompressed(image, IMAGE_FORMAT, COMPRESSION_QUALITY, outputStream);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -86,13 +94,9 @@ class CircularImageBuffer implements Iterable<BufferedImage> {
     }
 
     private void createEntryIfNeeded(final int index) {
-        try {
-            if (entries[index] == null) {
-                final Path path = Files.createFile(Paths.get(tmpImagesDir.toString(), String.valueOf(index)));
-                entries[index] = new Entry(path);
-            }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+        if (entries[index] == null) {
+            final Path path = Paths.get(tmpImagesDir.toString(), String.valueOf(index));
+            entries[index] = new Entry(path);
         }
     }
 
@@ -135,14 +139,13 @@ class CircularImageBuffer implements Iterable<BufferedImage> {
         @Override
         public BufferedImage next() {
             final int nextIndex = normalizeIndex(firstIndex + count);
-            final ImageWithCursorPositions next = ImageWithCursorPositions.newImage(getImage(nextIndex), entries[nextIndex].cursorPos);
-            final int nextCursor = nextCursorIndex;
+            final Point cursorPos = entries[nextIndex].cursorPositions[nextCursorIndex];
             ++nextCursorIndex;
-            if (nextCursorIndex >= next.cursorPositions.length) {
+            if (nextCursorIndex >= entries[nextIndex].cursorPositions.length) {
                 ++count;
                 nextCursorIndex = 0;
             }
-            return ImageUtils.drawCursor(next.img, next.cursorPositions[nextCursor]);
+            return ImageUtils.drawCursor(getImage(nextIndex), cursorPos);
         }
 
         private BufferedImage getImage(final int index) {
@@ -161,11 +164,11 @@ class CircularImageBuffer implements Iterable<BufferedImage> {
         @NotNull
         final Path imagePath;
         @NotNull
-        Point[] cursorPos;
+        Point[] cursorPositions;
 
         Entry(@NotNull final Path imagePath) {
             this.imagePath = imagePath;
-            this.cursorPos = new Point[]{ZERO};
+            this.cursorPositions = new Point[]{ZERO};
         }
     }
 }

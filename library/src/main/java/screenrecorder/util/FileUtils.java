@@ -57,4 +57,14 @@ public class FileUtils {
             throw new RuntimeException("resource not found");
         }
     }
+
+    public static void createFileIfNotExists(@NotNull final Path filePath) {
+        try {
+            if (!Files.exists(filePath)) {
+                Files.createFile(filePath);
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
 }
