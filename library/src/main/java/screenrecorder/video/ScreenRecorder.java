@@ -2,12 +2,14 @@ package screenrecorder.video;
 
 import org.jetbrains.annotations.NotNull;
 import screenrecorder.Recorder;
-import screenrecorder.util.ImageUtils;
 import screenrecorder.util.Screenshotter;
 
 import java.awt.*;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
+
+import static screenrecorder.util.Require.require;
+import static screenrecorder.util.Require.requireNotNull;
 
 public class ScreenRecorder implements Recorder {
 
@@ -15,19 +17,19 @@ public class ScreenRecorder implements Recorder {
 
     private static final int DEFAULT_FRAMERATE = 7;
     private static final int TERMINATION_TIMEOUT_IN_SECONDS = 10;
+    private static final int CURSOR_CAPTURE_COUNT = 4;
 
     @NotNull
     private final VideoParams params;
     @NotNull
-    private final CircularImageBuffer imagesStorage;
-    @NotNull
     private final ExecutorService executor;
-
+    private Future<CircularImageBuffer> futureImages;
+    private final int videoDurationInSec;
     private volatile boolean stopped;
 
     private ScreenRecorder(@NotNull final VideoParams params, final int videoDuration, @NotNull final TimeUnit timeUnit) {
         this.params = params;
-        this.imagesStorage = CircularImageBuffer.newBuffer((int) timeUnit.toSeconds(videoDuration) * params.frameRate);
+        videoDurationInSec = (int) timeUnit.toSeconds(videoDuration);
         executor = Executors.newSingleThreadExecutor();
     }
 
@@ -44,46 +46,51 @@ public class ScreenRecorder implements Recorder {
 
     @Override
     public void startRecording() {
-        if (executor.isShutdown()) {
-            throw new IllegalStateException();
-        }
+        require(!executor.isShutdown(), "cannot perform this action after stop");
+        require(futureImages == null, "cannot perform this after start");
+
         LOG.info("start recording...");
-        executor.execute(() -> {
+        futureImages = executor.submit(() -> {
+            final CircularImageBuffer buffer =
+                    CircularImageBuffer.newBuffer(videoDurationInSec * params.frameRate / CURSOR_CAPTURE_COUNT);
             final Screenshotter screenshotter =
                     Screenshotter.newInstance(params.captureArea);
             while (!stopped) {
-                imagesStorage.putAsync(screenshotter.takeScreenshot());
+                buffer.putAsync(screenshotter.takeScreenshot());
             }
+            return buffer;
         });
     }
 
-    private void stop() {
+    private CircularImageBuffer stopAndGetImages() {
+        requireNotNull(futureImages, "record is not started");
         LOG.info("stop recording...");
+
         stopped = true;
         executor.shutdown();
         try {
             executor.awaitTermination(TERMINATION_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
+            return futureImages.get();
+        } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
     public void stopRecording() {
-        try {
-            stop();
-        } finally {
-            imagesStorage.deleteImages();
-        }
+        stopAndGetImages().deleteImages();
     }
 
     @Override
     public void stopRecordingAndSave(@NotNull final String outFilePath) {
+        CircularImageBuffer images = null;
         try {
-            stop();
-            VideoMaker.newInstance(params).makeVideoAndSave(imagesStorage, outFilePath);
+            images = stopAndGetImages();
+            VideoMaker.newInstance(params).makeVideoAndSave(images, outFilePath);
         } finally {
-            imagesStorage.deleteImages();
+            if (images != null) {
+                images.deleteImages();
+            }
         }
     }
 }
