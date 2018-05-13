@@ -46,18 +46,6 @@ public class FileUtils {
         }
     }
 
-    public static Path getResourcePath(@NotNull final Class<?> cls, @NotNull final String resourcePath) {
-        final URL url = cls.getResource(resourcePath);
-        if (url == null) {
-            throw new RuntimeException("resource not found");
-        }
-        try {
-            return Paths.get(url.toURI());
-        } catch (URISyntaxException e) {
-            throw new RuntimeException("resource not found");
-        }
-    }
-
     public static void createFileIfNotExists(@NotNull final Path filePath) {
         try {
             if (!Files.exists(filePath)) {

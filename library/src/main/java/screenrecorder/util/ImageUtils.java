@@ -10,6 +10,7 @@ import javax.imageio.stream.ImageOutputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.util.Iterator;
@@ -24,17 +25,13 @@ public class ImageUtils {
 
     @NotNull
     public static BufferedImage drawCursor(@NotNull final BufferedImage image, @NotNull final Point cursorPos) {
-        try {
-            final BufferedImage cursorImg = ImageIO.read(FileUtils.getResourcePath(ImageUtils.class, CURSOR_RES).toFile());
-            image.getGraphics()
-                    .drawImage(cursorImg,
-                            cursorPos.x - cursorImg.getWidth() / 2,
-                            cursorPos.y - cursorImg.getHeight() / 2,
-                            null);
-            return image;
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        final BufferedImage cursorImg = ImageUtils.getImageResource(ImageUtils.class, CURSOR_RES);
+        image.getGraphics()
+                .drawImage(cursorImg,
+                        cursorPos.x - cursorImg.getWidth() / 2,
+                        cursorPos.y - cursorImg.getHeight() / 2,
+                        null);
+        return image;
     }
 
     public static void writeCompressed(@NotNull final BufferedImage image,
@@ -65,5 +62,13 @@ public class ImageUtils {
         final Iterator<ImageWriter> it = ImageIO.getImageWritersByFormatName(imageFormat);
         require(it.hasNext());
         return it.next();
+    }
+
+    public static BufferedImage getImageResource(@NotNull final Class<?> cls, @NotNull final String resourcePath) {
+        try (final InputStream inputStream = cls.getResourceAsStream(resourcePath)) {
+            return ImageIO.read(inputStream);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 }
