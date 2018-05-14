@@ -1,4 +1,4 @@
-package screenrecorder.image;
+package com.github.shishovv.screenrecorder.image;
 
 import org.jetbrains.annotations.NotNull;
 

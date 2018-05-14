@@ -1,15 +1,15 @@
-package screenrecorder.video;
+package com.github.shishovv.screenrecorder.video;
 
 import org.jetbrains.annotations.NotNull;
-import screenrecorder.Recorder;
-import screenrecorder.util.Screenshotter;
+import com.github.shishovv.screenrecorder.Recorder;
+import com.github.shishovv.screenrecorder.util.Screenshotter;
 
 import java.awt.*;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
 
-import static screenrecorder.util.Require.require;
-import static screenrecorder.util.Require.requireNotNull;
+import static com.github.shishovv.screenrecorder.util.Require.require;
+import static com.github.shishovv.screenrecorder.util.Require.requireNotNull;
 
 public class ScreenRecorder implements Recorder {
 

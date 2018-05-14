@@ -1,9 +1,8 @@
-package screenrecorder;
+package com.github.shishovv.screenrecorder;
 
+import com.github.shishovv.screenrecorder.video.ScreenRecorder;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
-import screenrecorder.Recorder;
-import screenrecorder.video.ScreenRecorder;
 
 import java.nio.file.Paths;
 import java.time.LocalDateTime;

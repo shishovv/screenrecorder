@@ -1,4 +1,4 @@
-group 'screenrecorder'
+group 'com.github.shishovv.screenrecorder'
 version '1.0-SNAPSHOT'
 
 jar {

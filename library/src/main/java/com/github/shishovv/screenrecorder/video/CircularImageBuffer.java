@@ -1,9 +1,9 @@
-package screenrecorder.video;
+package com.github.shishovv.screenrecorder.video;
 
 import org.jetbrains.annotations.NotNull;
-import screenrecorder.image.ImageWithCursorPositions;
-import screenrecorder.util.FileUtils;
-import screenrecorder.util.ImageUtils;
+import com.github.shishovv.screenrecorder.image.ImageWithCursorPositions;
+import com.github.shishovv.screenrecorder.util.FileUtils;
+import com.github.shishovv.screenrecorder.util.ImageUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -21,7 +21,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import static screenrecorder.util.Require.require;
+import static com.github.shishovv.screenrecorder.util.Require.require;
 
 class CircularImageBuffer implements Iterable<BufferedImage> {
 

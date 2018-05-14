@@ -1,4 +1,4 @@
-package screenrecorder.video;
+package com.github.shishovv.screenrecorder.video;
 
 import org.jcodec.api.awt.AWTSequenceEncoder;
 import org.jetbrains.annotations.NotNull;

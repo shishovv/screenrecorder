@@ -1,4 +1,4 @@
-package screenrecorder.util;
+package com.github.shishovv.screenrecorder.util;
 
 import java.util.Objects;
 

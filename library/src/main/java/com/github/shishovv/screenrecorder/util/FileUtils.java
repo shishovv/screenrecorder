@@ -1,11 +1,9 @@
-package screenrecorder.util;
+package com.github.shishovv.screenrecorder.util;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 

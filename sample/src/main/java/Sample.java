@@ -1,6 +1,6 @@
-import screenrecorder.Recorder;
-import screenrecorder.video.ScreenRecorder;
-import screenrecorder.video.VideoParams;
+import com.github.shishovv.screenrecorder.Recorder;
+import com.github.shishovv.screenrecorder.video.ScreenRecorder;
+import com.github.shishovv.screenrecorder.video.VideoParams;
 
 import java.awt.*;
 import java.util.concurrent.TimeUnit;

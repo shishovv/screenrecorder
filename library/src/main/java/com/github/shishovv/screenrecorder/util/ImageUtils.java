@@ -1,4 +1,4 @@
-package screenrecorder.util;
+package com.github.shishovv.screenrecorder.util;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -15,7 +15,7 @@ import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.util.Iterator;
 
-import static screenrecorder.util.Require.require;
+import static com.github.shishovv.screenrecorder.util.Require.require;
 
 public class ImageUtils {
 
@@ -64,7 +64,7 @@ public class ImageUtils {
         return it.next();
     }
 
-    public static BufferedImage getImageResource(@NotNull final Class<?> cls, @NotNull final String resourcePath) {
+    private static BufferedImage getImageResource(@NotNull final Class<?> cls, @NotNull final String resourcePath) {
         try (final InputStream inputStream = cls.getResourceAsStream(resourcePath)) {
             return ImageIO.read(inputStream);
         } catch (IOException e) {

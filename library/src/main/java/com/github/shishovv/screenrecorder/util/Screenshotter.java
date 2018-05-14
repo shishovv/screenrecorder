@@ -1,7 +1,7 @@
-package screenrecorder.util;
+package com.github.shishovv.screenrecorder.util;
 
 import org.jetbrains.annotations.NotNull;
-import screenrecorder.image.ImageWithCursorPositions;
+import com.github.shishovv.screenrecorder.image.ImageWithCursorPositions;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

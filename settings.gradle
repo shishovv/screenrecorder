@@ -1,4 +1,4 @@
-rootProject.name = 'screenrecorder'
+rootProject.name = 'com.github.shishovv.screenrecorder'
 include 'library'
 include 'sample'
 include 'junit'
