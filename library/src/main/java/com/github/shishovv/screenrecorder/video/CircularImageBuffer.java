@@ -28,7 +28,7 @@ class CircularImageBuffer implements Iterable<BufferedImage> {
     private static final Logger LOG = Logger.getLogger(CircularImageBuffer.class.getSimpleName());
 
     private static final String IMAGE_FORMAT = "jpg";
-    private static final float COMPRESSION_QUALITY = 0.2f;
+    private static final float COMPRESSION_QUALITY = 0.4f;
     private static final int TERMINATION_TIMEOUT_IN_SECONDS = 10;
 
     @NotNull
