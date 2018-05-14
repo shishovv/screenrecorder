@@ -139,13 +139,20 @@ class CircularImageBuffer implements Iterable<BufferedImage> {
         @Override
         public BufferedImage next() {
             final int nextIndex = normalizeIndex(firstIndex + count);
-            final Point cursorPos = entries[nextIndex].cursorPositions[nextCursorIndex];
+            final BufferedImage next;
+            if (nextCursorIndex < entries[nextIndex].cursorPositions.length) {
+                final Point cursorPos = entries[nextIndex].cursorPositions[nextCursorIndex];
+                next = ImageUtils.drawCursor(getImage(nextIndex), cursorPos);
+            } else {
+                next = getImage(nextIndex);
+            }
+
             ++nextCursorIndex;
             if (nextCursorIndex >= entries[nextIndex].cursorPositions.length) {
                 ++count;
                 nextCursorIndex = 0;
             }
-            return ImageUtils.drawCursor(getImage(nextIndex), cursorPos);
+            return next;
         }
 
         private BufferedImage getImage(final int index) {
@@ -159,7 +166,7 @@ class CircularImageBuffer implements Iterable<BufferedImage> {
 
     private static class Entry {
 
-        static final Point ZERO = new Point(0, 0);
+        static final Point[] NO_CURSOR = new Point[]{};
 
         @NotNull
         final Path imagePath;
@@ -168,7 +175,7 @@ class CircularImageBuffer implements Iterable<BufferedImage> {
 
         Entry(@NotNull final Path imagePath) {
             this.imagePath = imagePath;
-            this.cursorPositions = new Point[]{ZERO};
+            this.cursorPositions = NO_CURSOR;
         }
     }
 }
