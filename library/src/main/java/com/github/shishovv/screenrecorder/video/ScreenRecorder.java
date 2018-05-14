@@ -93,4 +93,9 @@ public class ScreenRecorder implements Recorder {
             }
         }
     }
+
+    @Override
+    public boolean isStopped() {
+        return stopped;
+    }
 }

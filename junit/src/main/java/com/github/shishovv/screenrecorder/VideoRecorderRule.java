@@ -36,6 +36,8 @@ public class VideoRecorderRule extends TestWatcher {
 
     @Override
     protected void finished(Description description) {
-        recorder.stopRecording();
+        if (!recorder.isStopped()) {
+            recorder.stopRecording();
+        }
     }
 }
