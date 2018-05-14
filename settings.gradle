@@ -1,5 +1,5 @@
 rootProject.name = 'com.github.shishovv.screenrecorder'
-include 'library'
+include 'recorder'
 include 'sample'
 include 'junit'
 

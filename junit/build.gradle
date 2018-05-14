@@ -5,6 +5,6 @@ jar {
 }
 
 dependencies {
-    compile project(':library')
+    compile project(':recorder')
     compile group: 'junit', name: 'junit', version: '4.12'
 }
