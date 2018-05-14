@@ -1,12 +1,14 @@
 package com.github.shishovv.screenrecorder.video;
 
+import com.github.shishovv.screenrecorder.util.FileUtils;
 import org.jcodec.api.awt.AWTSequenceEncoder;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.logging.Logger;
 
 class VideoMaker {
@@ -28,7 +30,9 @@ class VideoMaker {
                           @NotNull String outFile) {
         LOG.info("start making video...");
         try {
-            AWTSequenceEncoder encoder = AWTSequenceEncoder.createSequenceEncoder(new File(outFile), params.frameRate);
+            final Path outPath = Paths.get(outFile);
+            FileUtils.createDirsIfNotExists(outPath);
+            AWTSequenceEncoder encoder = AWTSequenceEncoder.createSequenceEncoder(outPath.toFile(), params.frameRate);
             for (final BufferedImage image : images) {
                 encoder.encodeImage(image);
             }
