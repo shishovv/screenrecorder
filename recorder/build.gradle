@@ -9,7 +9,3 @@ dependencies {
     compile 'org.jcodec:jcodec:0.2.3'
     compile 'org.jcodec:jcodec-javase:0.2.3'
 }
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.7'
-}
