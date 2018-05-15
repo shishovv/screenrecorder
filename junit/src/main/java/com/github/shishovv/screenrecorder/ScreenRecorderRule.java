@@ -9,12 +9,12 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
-public class VideoRecorderRule extends TestWatcher {
+public class ScreenRecorderRule extends TestWatcher {
 
     private final Recorder recorder;
     private final String outDir;
 
-    public VideoRecorderRule(final int duration, final TimeUnit timeUnit, final String outDir) {
+    public ScreenRecorderRule(final int duration, final TimeUnit timeUnit, final String outDir) {
         recorder = ScreenRecorder.newRecorder(duration, timeUnit);
         this.outDir = outDir;
     }
