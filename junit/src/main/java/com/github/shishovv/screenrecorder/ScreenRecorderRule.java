@@ -29,7 +29,7 @@ public class ScreenRecorderRule extends TestWatcher {
         final String fileName = description.getMethodName()
                 + "_"
                 + LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
-                + ".mov";
+                + ".avi";
         final String outFile = Paths.get(outDir, fileName).toString();
         recorder.stopRecordingAndSave(outFile);
     }
