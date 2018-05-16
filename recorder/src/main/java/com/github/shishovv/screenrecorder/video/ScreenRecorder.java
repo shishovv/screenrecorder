@@ -1,10 +1,13 @@
 package com.github.shishovv.screenrecorder.video;
 
-import org.jetbrains.annotations.NotNull;
 import com.github.shishovv.screenrecorder.Recorder;
+import com.github.shishovv.screenrecorder.util.FileUtils;
 import com.github.shishovv.screenrecorder.util.Screenshotter;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
 
@@ -36,7 +39,10 @@ public class ScreenRecorder implements Recorder {
     @NotNull
     public static Recorder newRecorder(final int videoDuration, @NotNull final TimeUnit timeUnit) {
         final Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
-        return new ScreenRecorder(VideoParams.newParams(dimension.width, dimension.height, DEFAULT_FRAMERATE), videoDuration, timeUnit);
+        return new ScreenRecorder(
+                VideoParams.newParams(VideoCodec.TSCC, dimension.width, dimension.height, DEFAULT_FRAMERATE),
+                videoDuration,
+                timeUnit);
     }
 
     @NotNull
@@ -86,11 +92,25 @@ public class ScreenRecorder implements Recorder {
         CircularImageBuffer images = null;
         try {
             images = stopAndGetImages();
-            VideoMaker.newInstance(params).makeVideoAndSave(images, outFilePath);
+            final Path outPath = Paths.get(outFilePath);
+            FileUtils.createDirsIfNotExists(outPath);
+            getVideoMaker().makeVideoAndSave(images, outPath);
         } finally {
             if (images != null) {
                 images.deleteImages();
             }
+        }
+    }
+
+    @NotNull
+    private VideoMaker getVideoMaker() {
+        switch (params.videoCodec) {
+            case H264:
+                return H264VideoMaker.newInstance(params);
+            case TSCC:
+                return TechSmithVideoMaker.newInstance(params);
+            default:
+                throw new RuntimeException();
         }
     }
 
