@@ -68,6 +68,7 @@ public class ScreenRecorder implements Recorder {
         });
     }
 
+    @NotNull
     private CircularImageBuffer stopAndGetImages() {
         requireNotNull(futureImages, "record is not started");
         LOG.info("stop recording...");

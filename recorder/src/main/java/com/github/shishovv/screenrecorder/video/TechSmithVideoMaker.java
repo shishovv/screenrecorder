@@ -58,14 +58,14 @@ class TechSmithVideoMaker implements VideoMaker {
             final int videoTrack = movieWriter.addTrack(getOutputFormat());
             final Codec encoder = createEncoder();
 
-            final Buffer img = new Buffer();
-            img.format = IMAGE_FORMAT;
-            img.track = videoTrack;
-            final Buffer compressedImg = new Buffer();
+            final Buffer imgBuffer = new Buffer();
+            imgBuffer.format = IMAGE_FORMAT;
+            imgBuffer.track = videoTrack;
+            final Buffer compressedImgBuffer = new Buffer();
             for (final BufferedImage image : images) {
-                img.data = image;
-                tryEncode(encoder, img, compressedImg);
-                movieWriter.write(videoTrack, compressedImg);
+                imgBuffer.data = image;
+                tryEncode(encoder, imgBuffer, compressedImgBuffer);
+                movieWriter.write(videoTrack, compressedImgBuffer);
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
