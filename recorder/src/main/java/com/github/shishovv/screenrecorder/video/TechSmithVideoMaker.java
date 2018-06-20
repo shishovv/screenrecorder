@@ -15,13 +15,9 @@ import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.logging.Logger;
 
-import static org.monte.media.FormatKeys.EncodingKey;
 import static org.monte.media.FormatKeys.FrameRateKey;
 import static org.monte.media.FormatKeys.MediaTypeKey;
 import static org.monte.media.VideoFormatKeys.*;
-import static org.monte.media.VideoFormatKeys.MIME_AVI;
-import static org.monte.media.VideoFormatKeys.MediaType;
-import static org.monte.media.VideoFormatKeys.MimeTypeKey;
 
 class TechSmithVideoMaker implements VideoMaker {
 

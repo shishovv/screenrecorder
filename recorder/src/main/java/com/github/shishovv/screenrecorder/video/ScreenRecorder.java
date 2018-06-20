@@ -5,7 +5,6 @@ import com.github.shishovv.screenrecorder.util.FileUtils;
 import com.github.shishovv.screenrecorder.util.Screenshotter;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.*;
@@ -16,11 +15,12 @@ import static com.github.shishovv.screenrecorder.util.Require.requireNotNull;
 
 public class ScreenRecorder implements Recorder {
 
+    public static final int MAX_VIDEO_DURATION_IN_SECONDS = 86400;
+
     private static final Logger LOG = Logger.getLogger(ScreenRecorder.class.getSimpleName());
 
-    private static final int DEFAULT_FRAMERATE = 30;
     private static final int TERMINATION_TIMEOUT_IN_SECONDS = 10;
-    private static final int CURSOR_CAPTURE_COUNT = 4;
+    private static final int CURSOR_CAPTURE_COUNT = 2;
 
     @NotNull
     private final VideoParams params;
@@ -32,15 +32,20 @@ public class ScreenRecorder implements Recorder {
 
     private ScreenRecorder(@NotNull final VideoParams params, final int videoDuration, @NotNull final TimeUnit timeUnit) {
         this.params = params;
-        videoDurationInSec = (int) timeUnit.toSeconds(videoDuration);
+        videoDurationInSec = Math.toIntExact(timeUnit.toSeconds(videoDuration));
+        require(videoDurationInSec <= MAX_VIDEO_DURATION_IN_SECONDS, "video duration must be less than or equal to " + MAX_VIDEO_DURATION_IN_SECONDS);
         executor = Executors.newSingleThreadExecutor();
     }
 
     @NotNull
+    public static Recorder newRecorder() {
+        return new ScreenRecorder(VideoParams.DEFAULT_PARAMS, MAX_VIDEO_DURATION_IN_SECONDS, TimeUnit.SECONDS);
+    }
+
+    @NotNull
     public static Recorder newRecorder(final int videoDuration, @NotNull final TimeUnit timeUnit) {
-        final Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
         return new ScreenRecorder(
-                VideoParams.newParams(VideoCodec.TSCC, dimension.width, dimension.height, DEFAULT_FRAMERATE),
+                VideoParams.DEFAULT_PARAMS,
                 videoDuration,
                 timeUnit);
     }
@@ -56,9 +61,10 @@ public class ScreenRecorder implements Recorder {
         require(futureImages == null, "cannot perform this after start");
 
         LOG.info("start recording...");
+
         futureImages = executor.submit(() -> {
             final CircularImageBuffer buffer =
-                    CircularImageBuffer.newBuffer(videoDurationInSec * params.frameRate / CURSOR_CAPTURE_COUNT);
+                    CircularImageBuffer.newBuffer(Math.toIntExact((long) videoDurationInSec * params.frameRate / CURSOR_CAPTURE_COUNT));
             final Screenshotter screenshotter =
                     Screenshotter.newInstance(params.captureArea);
             while (!stopped) {
@@ -71,6 +77,7 @@ public class ScreenRecorder implements Recorder {
     @NotNull
     private CircularImageBuffer stopAndGetImages() {
         requireNotNull(futureImages, "record is not started");
+
         LOG.info("stop recording...");
 
         stopped = true;
@@ -96,6 +103,8 @@ public class ScreenRecorder implements Recorder {
             final Path outPath = Paths.get(outFilePath);
             FileUtils.createDirsIfNotExists(outPath);
             getVideoMaker().makeVideoAndSave(images, outPath);
+
+            LOG.info("video saved to " + outPath.toAbsolutePath());
         } finally {
             if (images != null) {
                 images.deleteImages();

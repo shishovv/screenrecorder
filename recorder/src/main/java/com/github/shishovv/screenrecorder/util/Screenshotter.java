@@ -5,6 +5,8 @@ import com.github.shishovv.screenrecorder.image.ImageWithCursorPositions;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Screenshotter {
 
@@ -29,11 +31,14 @@ public class Screenshotter {
 
     @NotNull
     public ImageWithCursorPositions takeScreenshot() {
-        final Point p1 = MouseInfo.getPointerInfo().getLocation();
-        final Point p2 = MouseInfo.getPointerInfo().getLocation();
+        final List<Point> cursorCaptures = new ArrayList<>();
+        cursorCaptures.add(getCursorPosition());
         final BufferedImage img = robot.createScreenCapture(rectangle);
-        final Point p3 = MouseInfo.getPointerInfo().getLocation();
-        final Point p4 = MouseInfo.getPointerInfo().getLocation();
-        return ImageWithCursorPositions.newImage(img, new Point[]{p1, p2, p3, p4});
+        cursorCaptures.add(getCursorPosition());
+        return ImageWithCursorPositions.newImage(img, cursorCaptures);
+    }
+
+    private Point getCursorPosition() {
+        return MouseInfo.getPointerInfo().getLocation();
     }
 }

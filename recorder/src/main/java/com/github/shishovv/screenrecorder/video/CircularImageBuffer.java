@@ -15,7 +15,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -41,6 +43,8 @@ class CircularImageBuffer implements Iterable<BufferedImage> {
     private int size;
 
     private CircularImageBuffer(final int capacity) {
+        require(capacity > 0, "capacity must be positive");
+
         try {
             tmpImagesDir = Files.createTempDirectory(getClass().getSimpleName());
         } catch (IOException e) {
@@ -140,15 +144,15 @@ class CircularImageBuffer implements Iterable<BufferedImage> {
         public BufferedImage next() {
             final int nextIndex = normalizeIndex(firstIndex + count);
             final BufferedImage next;
-            if (nextCursorIndex < entries[nextIndex].cursorPositions.length) {
-                final Point cursorPos = entries[nextIndex].cursorPositions[nextCursorIndex];
+            if (nextCursorIndex < entries[nextIndex].cursorPositions.size()) {
+                final Point cursorPos = entries[nextIndex].cursorPositions.get(nextCursorIndex);
                 next = ImageUtils.drawCursor(getImage(nextIndex), cursorPos);
             } else {
                 next = getImage(nextIndex);
             }
 
             ++nextCursorIndex;
-            if (nextCursorIndex >= entries[nextIndex].cursorPositions.length) {
+            if (nextCursorIndex >= entries[nextIndex].cursorPositions.size()) {
                 ++count;
                 nextCursorIndex = 0;
             }
@@ -166,16 +170,14 @@ class CircularImageBuffer implements Iterable<BufferedImage> {
 
     private static class Entry {
 
-        static final Point[] NO_CURSOR = new Point[]{};
-
         @NotNull
         final Path imagePath;
         @NotNull
-        Point[] cursorPositions;
+        List<Point> cursorPositions;
 
         Entry(@NotNull final Path imagePath) {
             this.imagePath = imagePath;
-            this.cursorPositions = NO_CURSOR;
+            this.cursorPositions = Collections.emptyList();
         }
     }
 }
